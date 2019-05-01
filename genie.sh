@@ -65,7 +65,7 @@ if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] ||  [ "
     exit 0
   fi
   echo ">>done with bwt-build-with-cp"
-  cc -Xpreprocessor -fopenmp -lomp -O1 -DPRINT_OUTPUT naive/bwt-naive.c build_bwt_index/file.cpp -o naive/bwt-naive
+  clang++ -Xpreprocessor -fopenmp -lomp -O1 -DPRINT_OUTPUT naive/bwt-naive.c build_bwt_index/file.cpp -o naive/bwt-naive
   if [ $? -ne 0 ]; then
     exit 0
   fi
