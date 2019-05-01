@@ -20,5 +20,5 @@ random.seed(0)
 for i in range(n):
     ind = random.randint(0, dnalen - length)
 
-    print ">" + sys.argv[1] + "_" + str(ind)
-    print dna[ind:ind + length]
+    # print ">" + sys.argv[1] + "_" + str(ind)
+    # print dna[ind:ind + length]
