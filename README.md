@@ -1,5 +1,11 @@
 # GENIE
 
+## Initialization
+
+On mac, start by running the following brew commands:
+`brew install gnu-sed`
+`brew install libomp`
+
 ## Setup 
 
 Add a ```[DATA].fa``` file to the ```data/``` directory. For example, we have ```test.fa```. 
