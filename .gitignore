@@ -1,0 +1,10 @@
+build_bwt_index/bwt-build-with-cp.8bit.32
+build_bwt_index/bwtbuildbinarybwt
+data/pp_test.fa
+data/test.bwt
+data/test.bwt.8bit.32
+data/test_big_1k.fa
+data/test_small_1k.fa
+naive/bwt-naive
+opt/bwt-match-checkpoint.8bit.32
+output_test
