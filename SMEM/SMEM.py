@@ -10,7 +10,7 @@ def get_SMEMS(query, reference):
     currentIndex = 0
     smem_table = {}
 
-    while currentIndex < len(query):
+    while currentIndex < len(reference):
         smem = get_SMEM_at_index(query, reference, currentIndex)
 
         sequence = smem[0]
@@ -18,6 +18,7 @@ def get_SMEMS(query, reference):
         end_index_suffix = smem[1][1]
 
         for i in range(start_index_suffix, end_index_suffix):
+            #TODO: add check for overlapping smems
             smem_table[i] = sequence
 
         currentIndex = end_index_suffix + 1
@@ -41,7 +42,7 @@ def get_SMEM_at_index(query, reference, start_index):
         else:
             forward_matches[currentSearch] = suffix_tuple
 
-    print ("Forward Extension Matches: " + str(forward_matches))
+    print("Forward Extension Matches: " + str(forward_matches))
 
     #backward extend
     for key in forward_matches:
@@ -74,4 +75,4 @@ def get_SMEM_at_index(query, reference, start_index):
 
         return [largest, backward_matches[largest]]
 
-print (get_SMEMS(q, ref))
+print(get_SMEMS(q, ref))
