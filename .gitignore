@@ -10,3 +10,5 @@ naive/bwt-naive
 opt/bwt-match-checkpoint.8bit.32
 output_test
 .idea/
+*.fa
+__pycache__/
