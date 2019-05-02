@@ -24,9 +24,9 @@ class SMEM:
             end_index_suffix = smem[1][1]
 
             for i in range(start_index_suffix, end_index_suffix):
-            if i in smem_table:
-                if len(sequence) > len(smem_table[i]):
-                    smem_table[i] = sequence
+                if i in smem_table:
+                    if len(sequence) > len(smem_table[i]):
+                        smem_table[i] = sequence
 
             currentIndex = end_index_suffix + 1
 
@@ -80,7 +80,6 @@ class SMEM:
                     largest = match
 
             return [largest, backward_matches[largest]]
-
 
 
 
