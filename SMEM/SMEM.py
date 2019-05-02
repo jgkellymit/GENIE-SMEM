@@ -11,27 +11,14 @@ class SMEM:
 
     def get_SMEMS(self, query):
 
-
         currentIndex = 0
-        smem_table = {}
+        smems = {}
 
-        while currentIndex <= len(query):
-            smem = self.get_SMEM_at_index(query, currentIndex)
+        for i in range(len(query)):
+            smem = self.get_SMEM_at_index(query, i)
+            smems[i] = smem
 
-
-            sequence = smem[0]
-            start_index_suffix = smem[1][0]
-            end_index_suffix = smem[1][1]
-
-            for i in range(start_index_suffix, end_index_suffix):
-                if i in smem_table:
-                    if len(sequence) > len(smem_table[i]):
-                        smem_table[i] = sequence
-
-            currentIndex = end_index_suffix + 1
-
-        return smem_table
-
+        return smems
 
     def get_SMEM_at_index(self, query, start_index):
         forward_matches = {}
@@ -66,7 +53,7 @@ class SMEM:
 
         print("Backward Extension Matches: " + str(backward_matches))
 
-        #get SMEM from backward_matches
+        #get SMEM from matches
         largest = ''
 
         if len(backward_matches) == 0:
@@ -85,7 +72,7 @@ class SMEM:
 
 if __name__ == '__main__':
     matcher = ExactMatch("mississippi.fa")
-    query = matcher.create_query(2)
+    query = matcher.create_query(3)
     print(query)
     smem = SMEM(matcher)
     print(smem.get_SMEMS(query))
