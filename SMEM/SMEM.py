@@ -8,7 +8,14 @@ class SMEM:
     def get_suffix_index(self, query):
         return self.matcher.exact_match_back_prop(query)
 
+    """
+        Get the SMEMs for every position in the query seqeunce
 
+        Args: query (str)
+        Returns: dictionary, keys are the start index of an SMEM in
+                 the query, values are the SMEM in the form:
+                 [sequence (str), (start_suffix_index (int)), end_suffix_index(int))]
+    """
     def get_SMEMS(self, query):
 
         currentIndex = 0
