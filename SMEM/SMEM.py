@@ -11,18 +11,22 @@ class SMEM:
 
     def get_SMEMS(self, query):
 
+
         currentIndex = 0
         smem_table = {}
 
-        while currentIndex < len(query):
+        while currentIndex <= len(query):
             smem = self.get_SMEM_at_index(query, currentIndex)
+
 
             sequence = smem[0]
             start_index_suffix = smem[1][0]
             end_index_suffix = smem[1][1]
 
             for i in range(start_index_suffix, end_index_suffix):
-                smem_table[i] = sequence
+            if i in smem_table:
+                if len(sequence) > len(smem_table[i]):
+                    smem_table[i] = sequence
 
             currentIndex = end_index_suffix + 1
 
@@ -76,6 +80,7 @@ class SMEM:
                     largest = match
 
             return [largest, backward_matches[largest]]
+
 
 
 
