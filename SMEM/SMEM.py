@@ -14,10 +14,10 @@ class SMEM:
         currentIndex = 0
         smems = {}
 
-        for i in range(len(query)):
-            smem = self.get_SMEM_at_index(query, i)
-            smems[i] = smem
-
+        while currentIndex < len(query)-1:
+            smem = self.get_SMEM_at_index(query, currentIndex)
+            smems[currentIndex] = smem
+            currentIndex += len(smem)
         return smems
 
     def get_SMEM_at_index(self, query, start_index):
