@@ -21,7 +21,7 @@ class SMEM:
         currentIndex = 0
         smems = {}
 
-        while currentIndex <= len(query)-1:
+        while currentIndex < len(query):
             smem = self.get_SMEM_at_index(query, currentIndex)
             smems[currentIndex] = smem
             currentIndex += len(smem[0])
