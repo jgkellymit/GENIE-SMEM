@@ -21,10 +21,10 @@ class SMEM:
         currentIndex = 0
         smems = {}
 
-        while currentIndex < len(query)-1:
+        while currentIndex <= len(query)-1:
             smem = self.get_SMEM_at_index(query, currentIndex)
             smems[currentIndex] = smem
-            currentIndex += len(smem)
+            currentIndex += len(smem[0])
         return smems
 
     def get_SMEM_at_index(self, query, start_index):
@@ -79,7 +79,8 @@ class SMEM:
 
 if __name__ == '__main__':
     matcher = ExactMatch("mississippi.fa")
-    query = matcher.create_query(3)
-    print(query)
+    #query = matcher.create_query(3)
+    query = "ipspspi"
+    print("Query Sequence: " + query)
     smem = SMEM(matcher)
-    print(smem.get_SMEMS(query))
+    print("SMEM Results: " + str(smem.get_SMEMS(query)))
