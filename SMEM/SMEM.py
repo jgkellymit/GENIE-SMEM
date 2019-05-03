@@ -12,19 +12,24 @@ class SMEM:
         Get the SMEMs for every position in the query seqeunce
 
         Args: query (str)
+              minimum_length (int) - minimum length of the SMEMs
+              
         Returns: dictionary, keys are the start index of an SMEM in
                  the query, values are the SMEM in the form:
                  [sequence (str), (start_suffix_index (int)), end_suffix_index(int))]
     """
-    def get_SMEMS(self, query):
+    def get_SMEMS(self, query, minimum_length):
 
         currentIndex = 0
         smems = {}
 
         while currentIndex < len(query):
             smem = self.get_SMEM_at_index(query, currentIndex)
-            smems[currentIndex] = smem
+
+            if len(smem[0]) >= minimum_length:
+                smems[currentIndex] = smem
             currentIndex += len(smem[0])
+
         return smems
 
     def get_SMEM_at_index(self, query, start_index):
@@ -79,8 +84,8 @@ class SMEM:
 
 if __name__ == '__main__':
     matcher = ExactMatch("mississippi.fa")
-    #query = matcher.create_query(3)
+    #query = matcher.create_query(2)
     query = "ipspspi"
     print("Query Sequence: " + query)
     smem = SMEM(matcher)
-    print("SMEM Results: " + str(smem.get_SMEMS(query)))
+    print("SMEM Results: " + str(smem.get_SMEMS(query, 2)))
