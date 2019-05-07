@@ -164,6 +164,8 @@ class ExactMatch:
         matches.sort()
         return matches
 
+    def get_position(self, suffix_array_index):
+        return self.fm_index["suffix_array"][suffix_array_index]
 
 # e_match = ExactMatch("mississippi.fa")
 # e_match.create_fm_index()
