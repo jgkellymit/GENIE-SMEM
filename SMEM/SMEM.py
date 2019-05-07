@@ -1,5 +1,6 @@
 from ExactMatch import ExactMatch
 from LUT import LUT
+import datetime
 
 class SMEM:
     def __init__(self, matcher: ExactMatch):
@@ -12,7 +13,7 @@ class SMEM:
     def get_SMEMS_with_lut(self, query, lut_size, minimum_smem_length):
         lut = LUT(self.matcher)
         lut.generate_lut(lut_size)
-        print("LUT: " + str(lut.LUT))
+        #print("LUT: " + str(lut.LUT))
         ref = self.matcher.ref_sequence[:self.matcher.ref_size-1]
 
         curr_SMEM_start = 0
@@ -141,11 +142,18 @@ class SMEM:
 
 
 if __name__ == '__main__':
-    matcher = ExactMatch("mississippi.fa")
+    matcher = ExactMatch("full_data.fa")
     matcher.create_fm_index()
     #query = matcher.create_query(2)
-    query = "pmissismiss"
+    query = "ATCGATCGA"
     print("Query Sequence: " + query)
     smem = SMEM(matcher)
-    #print("SMEM Results: " + str(smem.get_SMEMS(query, 2)))
-    print(smem.get_SMEMS_with_lut(query, 3, 4))
+
+    time1 = datetime.datetime.now()
+    smem.get_SMEMS(query, 3)
+    time2 = datetime.datetime.now()
+    smem.get_SMEMS_with_lut(query, 3, None)
+    end = datetime.datetime.now()
+
+    print("No LUT time: " + str(time2-time1))
+    print("LUT time: " +  str(end - time2))
