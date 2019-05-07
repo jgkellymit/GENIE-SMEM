@@ -167,6 +167,12 @@ class ExactMatch:
     def get_position(self, suffix_array_index):
         return self.fm_index["suffix_array"][suffix_array_index]
 
+    def get_positions(self, suffix_start, suffix_end):
+        matches = []
+        for index in range(suffix_start, suffix_end + 1):
+            matches.append(self.fm_index["suffix_array"][index])
+        return matches
+
 # e_match = ExactMatch("mississippi.fa")
 # e_match.create_fm_index()
 # e_match.create_query(3, "query1.fa")
