@@ -144,15 +144,15 @@ class SMEM:
 if __name__ == '__main__':
     matcher = ExactMatch("full_data.fa")
     matcher.create_fm_index()
-    #query = matcher.create_query(2)
-    query = "ATCGATCGA"
+    query = matcher.create_query(10000)
+    #query = ""
     print("Query Sequence: " + query)
     smem = SMEM(matcher)
 
     time1 = datetime.datetime.now()
     smem.get_SMEMS(query, 3)
     time2 = datetime.datetime.now()
-    smem.get_SMEMS_with_lut(query, 3, None)
+    smem.get_SMEMS_with_lut(query, 1000, None)
     end = datetime.datetime.now()
 
     print("No LUT time: " + str(time2-time1))
