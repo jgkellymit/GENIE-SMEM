@@ -11,19 +11,17 @@ class LUT:
         ref = self.matcher.ref_sequence[:self.matcher.ref_size-1]
 
         for pos in range(self.matcher.ref_size):
-            substrings = []
 
             for i in range(size):
                 if self.matcher.ref_size - size > pos-i >= 0:
-                    substrings.append(ref[pos-i:pos+size-i])
+                    substring = ref[pos-i:pos+size-i]
 
-            if len(substrings) > 0:
-                self.LUT[pos] = substrings
+                    if substring not in self.LUT:
+                        self.LUT[substring] = self.matcher.exact_match_back_prop(substring)
 
 
-matcher = ExactMatch("mississippi.fa")
-matcher.create_fm_index()
-lut = LUT(matcher)
-lut.generate_lut(4)
-
-print(lut.LUT)
+# matcher = ExactMatch("mississippi.fa")
+# matcher.create_fm_index()
+#lut = LUT(matcher)
+#lut.generate_lut(4)
+#print("LUT: " + str(lut.LUT))
