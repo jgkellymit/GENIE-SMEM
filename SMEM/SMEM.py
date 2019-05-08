@@ -5,16 +5,16 @@ import datetime
 class SMEM:
     def __init__(self, matcher: ExactMatch):
         self.matcher = matcher
+        self.lut = LUT(self.matcher)
+        self.lut.load_lut()
 
     #@staticmethod
     def get_suffix_index(self, query):
         return self.matcher.exact_match_back_prop(query)
 
-    def get_SMEMS_with_lut(self, query, lut_size, minimum_smem_length):
-        lut = LUT(self.matcher)
-        lut.generate_lut(lut_size)
-        #print("LUT: " + str(lut.LUT))
-        ref = self.matcher.ref_sequence[:self.matcher.ref_size-1]
+    def get_SMEMS_with_lut(self, query, minimum_smem_length):
+
+        ref = self.matcher.ref_sequence[:-1]
 
         curr_SMEM_start = 0
         curr_sub_start = 0
@@ -22,28 +22,38 @@ class SMEM:
 
         forward_match = None
 
-        #scroll scross the query finding matches in the lut
-        #expand the match backwards when it no longer matches
-        while curr_sub_start + lut_size <= len(query):
-            sub = query[curr_sub_start: curr_sub_start+lut_size]
+        smem_prev_indices = None
 
-            #check if substring is in lut
-            if sub in lut.LUT:
+
+        # scroll scross the query finding matches in the lut
+        # expand the match backwards when it no longer matches
+        while curr_sub_start + self.lut.lut_size <= len(query):
+            sub = query[curr_sub_start: curr_sub_start+self.lut.lut_size]
+
+            # check if substring is in lut
+            if sub in self.lut.lut:
                 if forward_match == None:
                     forward_match = sub
+
+                    ref_indexes = self.LUT[sub][1]
+                    smem_prev_indices = ref_indexes
                 else:
-                    #TODO: add a check to make sure that the substrings are in sequence
-                    #in the reference. This should be done by adding the start index of a substring
-                    #to the lut so that we can check it in O(1).
+                    # TODO: add a check to make sure that the substrings are in sequence
+                    # in the reference. This should be done by adding the start index of a substring
+                    # to the lut so that we can check it in O(1).
                     forward_match += sub[-1]
 
-                if curr_sub_start + lut_size == len(query):
+                    ref_indexes = self.LUT[sub][1]
+
+
+
+                if curr_sub_start + self.lut.lut_size == len(query):
                     smems[forward_match] = self.get_suffix_index(forward_match)
 
                 curr_sub_start += 1
 
             else:
-                #if there is no forward match yet you cant back extend, so continue
+                # if there is no forward match yet you cant back extend, so continue
                 if forward_match == None:
                     curr_sub_start += 1
                     curr_SMEM_start += 1
@@ -55,13 +65,19 @@ class SMEM:
                     else:
                         smems[backward_match] = self.get_suffix_index(backward_match)
 
-                    #move pointers and reset forward match
+                    # move pointers and reset forward match
                     curr_sub_start += 1
                     curr_SMEM_start = curr_sub_start
 
                     forward_match = None
 
         return smems
+
+
+
+    def get_SMEMS_with_lut_simple(self):
+        pass
+
 
     def backward_extension(self, query, start_index, forward_matches):
         backward_matches = {}
@@ -77,6 +93,8 @@ class SMEM:
                     break
                 else:
                     backward_matches[currentSearch] = suffix_tuple
+
+        # TODO -- Really only need the largest one here
         return backward_matches
 
 
@@ -107,10 +125,11 @@ class SMEM:
     def get_SMEM_at_index(self, query, start_index):
         forward_matches = {}
 
-        #forward extend
+        # Forward extend
         for i in range(start_index+1, len(query)+1):
             currentSearch = query[start_index:i]
 
+            # TODO -- Faster to narrow down using the suffix indices?
             suffix_tuple = self.get_suffix_index(currentSearch)
 
             if suffix_tuple == -1:
@@ -124,20 +143,20 @@ class SMEM:
 
         #print("Backward Extension Matches: " + str(backward_matches))
 
-        #get SMEM from matches
-        largest = ''
+        # Get SMEM from matches
+        largest_forward = ''
+        for match in forward_matches:
+            if len(match) > len(largest_forward):
+                largest_forward = match
+        largest_backward = ''
+        for match in backward_matches:
+            if len(match) > len(largest_backward):
+                largest_backward = match
 
-        if len(backward_matches) == 0:
-            for match in forward_matches:
-                if len(match) > len(largest):
-                    largest = match
-            return [largest, forward_matches[largest]]
+        if len(largest_forward) > len(largest_backward):
+            return [largest_forward, forward_matches[largest_forward]]
         else:
-            for match in backward_matches:
-                if len(match) > len(largest):
-                    largest = match
-
-            return [largest, backward_matches[largest]]
+            return [largest_backward, backward_matches[largest_backward]]
 
 
 
