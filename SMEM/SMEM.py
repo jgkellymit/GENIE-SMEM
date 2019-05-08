@@ -21,10 +21,7 @@ class SMEM:
         smems = {}
 
         forward_match = None
-
         smem_prev_indices = None
-
-
         # scroll scross the query finding matches in the lut
         # expand the match backwards when it no longer matches
         while curr_sub_start + self.lut.lut_size <= len(query):
@@ -35,17 +32,11 @@ class SMEM:
                 if forward_match == None:
                     forward_match = sub
 
-                    ref_indexes = self.LUT[sub][1]
-                    smem_prev_indices = ref_indexes
                 else:
                     # TODO: add a check to make sure that the substrings are in sequence
                     # in the reference. This should be done by adding the start index of a substring
                     # to the lut so that we can check it in O(1).
                     forward_match += sub[-1]
-
-                    ref_indexes = self.LUT[sub][1]
-
-
 
                 if curr_sub_start + self.lut.lut_size == len(query):
                     smems[forward_match] = self.get_suffix_index(forward_match)
@@ -60,10 +51,10 @@ class SMEM:
                 else:
                     #back extend the forward match and then add it as an smem
                     backward_match = self.backward_extension(query, curr_SMEM_start, {forward_match:None})
-                    if len(backward_match) == 0:
+                    if len(backward_match[0]) == 0:
                         smems[forward_match] = self.get_suffix_index(forward_match)
                     else:
-                        smems[backward_match] = self.get_suffix_index(backward_match)
+                        smems[backward_match] = backward_match[1]
 
                     # move pointers and reset forward match
                     curr_sub_start += 1
@@ -75,12 +66,70 @@ class SMEM:
 
 
 
-    def get_SMEMS_with_lut_simple(self):
-        pass
+    def get_SMEMS_with_lut_simple(self, query, minimum_smem_length= None):
+        smems = {}
+
+        start_index = 0
+        end_index = start_index + self.lut.lut_size
+
+        while start_index < len(query):
+            if end_index >= len(query):
+                end_index = len(query)
+
+            sub = query[start_index: end_index]
+            if sub in self.lut.lut:
+                #forward extend from end of sub
+                suffix_tuple = self.get_suffix_index(sub)
+                forward_matches = {sub: suffix_tuple}
+                largest_forward = sub
+                currentSearch = sub
+
+                for i in range(end_index, len(query)):
+                    currentSearch += query[i]
+                    suffix_tuple = self.get_suffix_index(currentSearch)
+
+                    if suffix_tuple == -1:
+                        #end_index = i
+                        break
+                    else:
+                        forward_matches[currentSearch] = suffix_tuple
+                        if len(currentSearch) > len(largest_forward):
+                            largest_forward = currentSearch
+
+                #backward extend from start of sub
+                largest_backward = self.backward_extension(query, start_index, forward_matches)
+
+                #get the largest from the forward and backward extensions
+                if len(largest_forward) > len(largest_backward[0]):
+                    smems[largest_forward] = forward_matches[largest_forward]
+                else:
+                    smems[largest_backward[0]] = largest_backward[1]
+                #move pointers
+                start_index = end_index + 1
+                end_index = start_index + self.lut.lut_size
+
+            else:
+                #standard SMEM search along indices in the substring that didnt appear in the LUT
+                current_index = start_index
+                while current_index < end_index:
+                    smem = self.get_SMEM_at_index(query, current_index)
+
+                    if len(smem[0]) >= minimum_smem_length:
+                        smems[smem[0]] = smem[1]
+
+                    current_index += 1
+
+                #move pointers
+                start_index = end_index + 1
+                end_index = start_index + self.lut.lut_size
+
+        return smems
 
 
     def backward_extension(self, query, start_index, forward_matches):
-        backward_matches = {}
+        largest = ''
+        suffix_of_largest = None
+
         for key in forward_matches:
 
             for i in range(start_index-1, -1, -1):
@@ -92,10 +141,30 @@ class SMEM:
                 if suffix_tuple == -1:
                     break
                 else:
-                    backward_matches[currentSearch] = suffix_tuple
+                    if len(currentSearch) > len(largest):
+                        largest = currentSearch
+                        suffix_of_largest = suffix_tuple
 
-        # TODO -- Really only need the largest one here
-        return backward_matches
+        return largest, suffix_of_largest
+
+    def forward_extension(self, query, start_index):
+        forward_matches = {}
+        largest = ''
+
+        for i in range(start_index+1, len(query)+1):
+            currentSearch = query[start_index:i]
+
+            # TODO -- Faster to narrow down using the suffix indices?
+            suffix_tuple = self.get_suffix_index(currentSearch)
+
+            if suffix_tuple == -1:
+                break
+            else:
+                forward_matches[currentSearch] = suffix_tuple
+                if len(currentSearch) > len(largest):
+                    largest = currentSearch
+
+        return forward_matches, largest
 
 
     """
@@ -115,7 +184,6 @@ class SMEM:
 
         while currentIndex < len(query):
             smem = self.get_SMEM_at_index(query, currentIndex)
-
             if len(smem[0]) >= minimum_length:
                 smems[currentIndex] = smem
             currentIndex += len(smem[0])
@@ -123,56 +191,56 @@ class SMEM:
         return smems
 
     def get_SMEM_at_index(self, query, start_index):
-        forward_matches = {}
 
         # Forward extend
-        for i in range(start_index+1, len(query)+1):
-            currentSearch = query[start_index:i]
-
-            # TODO -- Faster to narrow down using the suffix indices?
-            suffix_tuple = self.get_suffix_index(currentSearch)
-
-            if suffix_tuple == -1:
-                break
-            else:
-                forward_matches[currentSearch] = suffix_tuple
+        forward_extension = self.forward_extension(query, start_index)
 
         #print("Forward Extension Matches: " + str(forward_matches))
 
-        backward_matches = self.backward_extension(query, start_index, forward_matches)
+        largest_backward = self.backward_extension(query, start_index, forward_extension[0])
 
         #print("Backward Extension Matches: " + str(backward_matches))
 
         # Get SMEM from matches
-        largest_forward = ''
-        for match in forward_matches:
-            if len(match) > len(largest_forward):
-                largest_forward = match
-        largest_backward = ''
-        for match in backward_matches:
-            if len(match) > len(largest_backward):
-                largest_backward = match
-
-        if len(largest_forward) > len(largest_backward):
-            return [largest_forward, forward_matches[largest_forward]]
+        if len(forward_extension[1]) > len(largest_backward[0]):
+            return [forward_extension[1], forward_extension[0][forward_extension[1]]]
         else:
-            return [largest_backward, backward_matches[largest_backward]]
+            return [largest_backward[0], largest_backward[1]]
 
 
 
 if __name__ == '__main__':
-    matcher = ExactMatch("full_data.fa")
-    matcher.create_fm_index()
-    query = matcher.create_query(10000)
-    #query = ""
-    print("Query Sequence: " + query)
+    matcher = ExactMatch("medium_data.fa")
+    matcher.load_fm_index()
+
+    #query = matcher.create_query(100)
+    query="GCGCAGGCGCAGGGGCGTGTGTGCCTGTTTCTCCAC"
     smem = SMEM(matcher)
 
-    time1 = datetime.datetime.now()
-    smem.get_SMEMS(query, 3)
-    time2 = datetime.datetime.now()
-    smem.get_SMEMS_with_lut(query, 1000, None)
-    end = datetime.datetime.now()
+    minimum_smem_length = 10
+    start = datetime.datetime.now()
+    standard = smem.get_SMEMS(query, minimum_smem_length)
+    end1 = datetime.datetime.now()
+    simple_lut = smem.get_SMEMS_with_lut_simple(query, minimum_smem_length)
+    end2 = datetime.datetime.now()
+    lut = smem.get_SMEMS_with_lut(query, minimum_smem_length)
+    end3 = datetime.datetime.now()
+    print("\n")
+    print("Query Sequence: ")
+    print(query)
+    print("___________________________")
+    print("Standard SMEM Result:")
+    print(standard)
+    print("\n")
+    print("Simple LUT SMEM Result:")
+    print(simple_lut)
+    print("\n")
+    print("LUT SMEM Result:")
+    print(lut)
 
-    print("No LUT time: " + str(time2-time1))
-    print("LUT time: " +  str(end - time2))
+
+    print("___________________________")
+    print("Standard SMEM Time: " + str(end1-start))
+    print("Simple LUT SMEM Time: " + str(end3-end2))
+    print("LUT SMEM Time: " + str(end2-end1))
+    print("\n")

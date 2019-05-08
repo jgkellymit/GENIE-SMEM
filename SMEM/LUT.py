@@ -50,8 +50,8 @@ class LUT:
 
 
 if __name__ == '__main__':
-    matcher = ExactMatch("medium_data.fa")
+    matcher = ExactMatch("mississippi.fa")
     lut = LUT(matcher)
-    lut.generate_lut(20)
+    lut.generate_lut(3)
     lut.save_lut()
     print("LUT: " + str(lut.lut))
