@@ -20,26 +20,36 @@ class ExactMatch:
 
 
     def create_fm_index(self):
+        self.load_ref_sequence()
+
+        bwt_array, first_index_array, suffix_array = self.create_bwt_matrix()
+
+        o_matrix = self.create_occurance_matrix(bwt_array)
+        c_dic = self.create_count_dic(first_index_array)
+        self.fm_index = {"bwt_array": bwt_array, "suffix_array": suffix_array, "occurance_matrix": o_matrix,
+                         "count_dic": c_dic, "ref_size": self.ref_size}
+
+        with open(path.join("data", self.fm_file), "w") as fm_file:
+            fm_file.write(json.dumps(self.fm_index, indent=4, sort_keys=True))
+
+    def load_fm_index(self):
+        try:
+            with open(path.join("data", self.fm_file),"r") as fm_file:
+                self.fm_index = json.load(fm_file)
+                self.ref_size = self.fm_index["ref_size"]
+        except FileNotFoundError:
+            raise FileNotFoundError("No FM index file found. Run ExactMatch.createFMIndex to create an FM index.")
+
+    def load_ref_sequence(self):
         with open(path.join("data", self.ref_seq_file), "r") as refFile:
             refFile.readline()
             self.ref_sequence = ""
             for line in refFile:
                 self.ref_sequence += line.strip()
-
-        bwt_array, first_index_array, suffix_array = self.create_bwt_matrix()
-
-        o_matrix = self.get_occurance_matrix(bwt_array)
-        c_dic = self.get_count_dic(first_index_array)
-        self.fm_index = {"bwt_array": bwt_array, "suffix_array": suffix_array, "occurance_matrix": o_matrix,
-                         "count_dic": c_dic}
-
-        with open(path.join("data", self.fm_file), "w") as fm_file:
-            fm_file.write(json.dumps(self.fm_index, indent=4, sort_keys=True))
-
-
-    def create_bwt_matrix(self):
         self.ref_sequence += "$"
         self.ref_size = len(self.ref_sequence)
+
+    def create_bwt_matrix(self):
         bwt_matrix = []
 
         # Rotate
@@ -58,7 +68,7 @@ class ExactMatch:
         return bwt_array, first_index_array, suffix_array
 
     @staticmethod
-    def get_occurance_matrix(bwt_array):
+    def create_occurance_matrix(bwt_array):
         o_dic = {}
         index = 0
         for item in bwt_array:
@@ -80,7 +90,7 @@ class ExactMatch:
         return o_dic
 
     @staticmethod
-    def get_count_dic(first_index_array):
+    def create_count_dic(first_index_array):
         count_dic = {}
         index = 0
         for char in first_index_array:
@@ -101,20 +111,19 @@ class ExactMatch:
     # Create a query of size "query_size" from the reference sequence
     def create_query(self, query_size, query_output_file=None):
         if self.ref_sequence is None:
-            with open(path.join("data", self.ref_seq_file), "r") as refFile:
-                refFile.readline()
-                self.ref_sequence = ""
-                for line in refFile:
-                    self.ref_sequence += line.strip()
-            self.ref_size = len(self.ref_sequence)
+            self.load_ref_sequence()
 
         random.seed(0)
-        query_start = random.randint(0, self.ref_size - query_size)
+        query_start = random.randint(0, self.ref_size - query_size - 1) # -1 for dollar sign
         query = self.ref_sequence[query_start: query_start + query_size]
         if query_output_file is not None:
             with open(path.join("data", query_output_file), "w+") as q_out_f:
                 q_out_f.write(">query from '" + self.ref_seq_file + "' zero-index location: " + str(query_start) + "\n")
-                q_out_f.write(query + "\n")
+
+                # split it up to be consistent with data files
+                split_50 = [query[i:i + 50] for i in range(0, len(query), 50)]
+                query_split = "\n".join(split_50)
+                q_out_f.write(query_split)
 
         self.query_sequence = query
         return query
@@ -123,12 +132,7 @@ class ExactMatch:
     # Do exact match back prop and return the locations in the suffix array of matches
     def exact_match_back_prop(self, query_seq: str):
         if self.fm_index == {}:
-            try:
-                with open(path.join("data", self.fm_file), "r") as FM_file:
-                    self.fm_index = json.load(FM_file)
-            except FileNotFoundError:
-                print("No FM index file found. Run ExactMatch.createFMIndex to create an FM index.")
-                return
+            self.load_fm_index()
 
         start = 1
         end = self.fm_index["count_dic"][""]
@@ -164,8 +168,10 @@ class ExactMatch:
         matches.sort()
         return matches
 
+
     def get_position(self, suffix_array_index):
         return self.fm_index["suffix_array"][suffix_array_index]
+
 
     def get_positions(self, suffix_start, suffix_end):
         matches = []
@@ -173,7 +179,11 @@ class ExactMatch:
             matches.append(self.fm_index["suffix_array"][index])
         return matches
 
-# e_match = ExactMatch("mississippi.fa")
-# e_match.create_fm_index()
-# e_match.create_query(3, "query1.fa")
-# print(e_match.exact_match())
+
+if __name__ == '__main__':
+
+    e_match = ExactMatch("medium_data.fa")
+    # e_match.create_fm_index()
+    e_match.load_fm_index()
+    e_match.create_query(200, "query200.fa")
+    # print(e_match.exact_match())
