@@ -95,6 +95,7 @@ class SMEM:
                 #backward extend from start of sub
                 largest_backward = self.backward_extension(query, start_index, forward_matches)
 
+                #get the largest from the forward and backward extensions
                 if len(largest_forward) > len(largest_backward[0]):
                     smems[largest_forward] = forward_matches[largest_forward]
                 else:
@@ -105,12 +106,12 @@ class SMEM:
                 end_index = start_index + self.lut.lut_size
 
             else:
-                #standard SMEM search along the substring that didnt appear in the LUT
+                #standard SMEM search along indices in the substring that didnt appear in the LUT
                 for i in range(self.lut.lut_size):
                     smem = self.get_SMEM_at_index(query, start_index)
 
                     if len(smem[0]) >= minimum_smem_length:
-                        smems[smem] = self.get_suffix_index(smem)
+                        smems[smem[0]] = smem[1]
 
                 #move pointers
                 start_index = end_index + 1
