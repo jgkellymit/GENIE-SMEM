@@ -89,7 +89,7 @@ class SMEM:
                     suffix_tuple = self.get_suffix_index(currentSearch)
 
                     if suffix_tuple == -1:
-                        #end_index = i
+                        end_index = i
                         break
                     else:
                         forward_matches[currentSearch] = suffix_tuple
