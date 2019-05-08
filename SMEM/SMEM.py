@@ -78,19 +78,18 @@ class SMEM:
 
             sub = query[start_index: end_index]
             if sub in self.lut.lut:
-                print(sub)
                 #forward extend from end of sub
                 suffix_tuple = self.get_suffix_index(sub)
                 forward_matches = {sub: suffix_tuple}
-                largest_forward = ''
+                largest_forward = sub
                 currentSearch = sub
 
-                for i in range(end_index+1, len(query)+1):
+                for i in range(end_index, len(query)):
                     currentSearch += query[i]
                     suffix_tuple = self.get_suffix_index(currentSearch)
 
                     if suffix_tuple == -1:
-                        end_index = i
+                        #end_index = i
                         break
                     else:
                         forward_matches[currentSearch] = suffix_tuple
@@ -105,25 +104,25 @@ class SMEM:
                     smems[largest_forward] = forward_matches[largest_forward]
                 else:
                     smems[largest_backward[0]] = largest_backward[1]
-
                 #move pointers
-                start_index = end_index
+                start_index = end_index + 1
                 end_index = start_index + self.lut.lut_size
 
             else:
                 #standard SMEM search along indices in the substring that didnt appear in the LUT
-                print(start_index, end_index)
-                for i in range(start_index, end_index):
-                    smem = self.get_SMEM_at_index(query, i)
+                current_index = start_index
+                while current_index < end_index:
+                    smem = self.get_SMEM_at_index(query, current_index)
 
                     if len(smem[0]) >= minimum_smem_length:
                         smems[smem[0]] = smem[1]
 
+                    current_index += 1
+
                 #move pointers
-                start_index = end_index
+                start_index = end_index + 1
                 end_index = start_index + self.lut.lut_size
 
-            print(smems)
         return smems
 
 
@@ -215,19 +214,20 @@ if __name__ == '__main__':
     matcher.load_fm_index()
 
     #query = matcher.create_query(100)
-    query="CCCAACCCCAACCCTAAGGGTGGAGGCGTGGCGCAGGCGCAGAGCACTG"
-    print("Query Sequence: " + query)
-    print(len(query))
+    query="GCGCAGGCGCAGGGGCGTGTGTGCCTGTTTCTCCAC"
     smem = SMEM(matcher)
 
+    minimum_smem_length = 10
     start = datetime.datetime.now()
-    standard = smem.get_SMEMS(query, 2)
+    standard = smem.get_SMEMS(query, minimum_smem_length)
     end1 = datetime.datetime.now()
-    simple_lut = smem.get_SMEMS_with_lut_simple(query, 2)
+    simple_lut = smem.get_SMEMS_with_lut_simple(query, minimum_smem_length)
     end2 = datetime.datetime.now()
-    lut = smem.get_SMEMS_with_lut(query, 2)
+    lut = smem.get_SMEMS_with_lut(query, minimum_smem_length)
     end3 = datetime.datetime.now()
-
+    print("\n")
+    print("Query Sequence: ")
+    print(query)
     print("___________________________")
     print("Standard SMEM Result:")
     print(standard)
