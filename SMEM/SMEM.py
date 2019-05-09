@@ -42,7 +42,7 @@ class SMEM:
         end_smem_index = current_index
         while end_smem_index < len(query):
             prev_frame = None
-            current_smem_possibility = ""
+            current_smem_possibility = None
             current_smem_suffix = ()
             current_smem_end_index = -1
 
@@ -51,7 +51,6 @@ class SMEM:
                 if current_index + self.lut.lut_size > len(query):
                     continue
 
-                # TODO index out of bounds
                 current_sub = query[current_index: current_index + self.lut.lut_size]
                 if current_sub in self.lut.lut:  # Case 1,2,4
                     if prev_frame is None:  # First check
@@ -67,18 +66,20 @@ class SMEM:
                                 forward_match = self.forward_extension(query, prev_frame[2] + self.lut.lut_size, prev_frame[0], prev_frame[1])
                                 if prev_frame[3]:
                                     backward_smems = self.backward_extension(query, prev_frame[2], forward_match[0])
-                                    if len(backward_smems[0]) >= len(current_smem_possibility):
+                                    if current_smem_possibility is None or len(backward_smems[0]) >= len(current_smem_possibility):
                                         current_smem_possibility = backward_smems[0]
                                         current_smem_suffix = backward_smems[1]
                                         current_smem_end_index = backward_smems[2]
                                 else:
-                                    if len(forward_match[1]) >= len(current_smem_possibility):
+                                    if forward_match[1] == "":
+                                        pass
+                                    elif current_smem_possibility is None or len(forward_match[1]) >= len(current_smem_possibility):
                                         current_smem_possibility = forward_match[1]
                                         current_smem_suffix = forward_match[0][forward_match[1]]
                                         current_smem_end_index = len(forward_match[1]) + prev_frame[2]
                             elif prev_frame[3]:  # backward extend
                                 backward_smems = self.backward_extension(query, prev_frame[2], {prev_frame[0]: prev_frame[1]})
-                                if len(backward_smems[0]) >= len(current_smem_possibility):
+                                if current_smem_possibility is None or len(backward_smems[0]) >= len(current_smem_possibility):
                                     current_smem_possibility = backward_smems[0]
                                     current_smem_suffix = backward_smems[1]
                                     current_smem_end_index = backward_smems[2]
@@ -92,12 +93,14 @@ class SMEM:
                             # print("Case 2")
                             if prev_frame[4]:  # forward extend
                                 forward_match = self.forward_extension(query, prev_frame[2] + self.lut.lut_size, prev_frame[0], prev_frame[1])
-                                if len(forward_match[1]) >= len(current_smem_possibility):
+                                if forward_match[1] == "":
+                                    pass
+                                elif current_smem_possibility is None or len(forward_match[1]) >= len(current_smem_possibility):
                                     current_smem_possibility = forward_match[1]
                                     current_smem_suffix = forward_match[0][forward_match[1]]
                                     current_smem_end_index = len(forward_match[1]) + prev_frame[2]
                             else:
-                                if len(current_sub) >= len(current_smem_possibility):
+                                if current_smem_possibility is None or len(current_sub) >= len(current_smem_possibility):
                                     current_smem_possibility = current_sub
                                     current_smem_suffix = self.lut.lut[current_sub][0]
                                     current_smem_end_index = self.lut.lut_size + current_index
@@ -112,20 +115,49 @@ class SMEM:
                         if prev_frame[4]:  # forward extend
                             forward_match = self.forward_extension(query, prev_frame[2] + self.lut.lut_size, prev_frame[0],
                                                                    prev_frame[1])
-                            if len(forward_match[1]) >= len(current_smem_possibility):
+                            if forward_match[1] == "":
+                                pass
+                            elif current_smem_possibility is None or len(forward_match[1]) >= len(current_smem_possibility):
                                 current_smem_possibility = forward_match[1]
                                 current_smem_suffix = forward_match[0][forward_match[1]]
                                 current_smem_end_index = len(forward_match[1]) + prev_frame[2]
 
                         else:
-                            if len(prev_frame[0]) >= len(current_smem_possibility):
+                            if current_smem_possibility is None or len(prev_frame[0]) >= len(current_smem_possibility):
                                 current_smem_possibility = prev_frame[0]
                                 current_smem_suffix = prev_frame[1]
                                 current_smem_end_index = self.lut.lut_size + prev_frame[2]
 
                         prev_frame = ()
 
-            if current_smem_possibility == "":  # No LUT match at any partition
+            # Last frame extension
+            if prev_frame is not None and prev_frame != ():
+                if prev_frame[4]:  # forward extend
+                    forward_match = self.forward_extension(query, prev_frame[2] + self.lut.lut_size, prev_frame[0],
+                                                           prev_frame[1])
+                    if prev_frame[3]:
+                        backward_smems = self.backward_extension(query, prev_frame[2], forward_match[0])
+                        if current_smem_possibility is None or len(backward_smems[0]) >= len(current_smem_possibility):
+                            current_smem_possibility = backward_smems[0]
+                            current_smem_suffix = backward_smems[1]
+                            current_smem_end_index = backward_smems[2]
+                    else:
+                        if forward_match[1] == "":
+                            pass
+                        elif current_smem_possibility is None or len(forward_match[1]) >= len(current_smem_possibility):
+                            current_smem_possibility = forward_match[1]
+                            current_smem_suffix = forward_match[0][forward_match[1]]
+                            current_smem_end_index = len(forward_match[1]) + prev_frame[2]
+                elif prev_frame[3]:  # backward extend
+                    backward_smems = self.backward_extension(query, prev_frame[2], {prev_frame[0]: prev_frame[1]})
+                    if current_smem_possibility is None or len(backward_smems[0]) >= len(current_smem_possibility):
+                        current_smem_possibility = backward_smems[0]
+                        current_smem_suffix = backward_smems[1]
+                        current_smem_end_index = backward_smems[2]
+
+
+
+            if current_smem_possibility is None:  # No LUT match at any partition
                 new_smem = self.get_SMEM_at_index(query, end_smem_index)
                 all_smems[new_smem[0]] = new_smem[1]
                 end_smem_index = new_smem[2]
@@ -271,11 +303,15 @@ class SMEM:
 
 
     def backward_extension(self, query, start_index, forward_matches):
-        largest = ''
+        largest = ""
         suffix_of_largest = None
         end_index = -1
 
+        largest_forward = ""
+
         for key in forward_matches:
+            if len(key) > len(largest_forward):
+                largest_forward = key
 
             for i in range(start_index-1, -1, -1):
 
@@ -292,6 +328,11 @@ class SMEM:
                         suffix_of_largest = suffix_tuple
                         end_index = start_index + len(key)
 
+        if len(largest_forward) > len(largest):
+            largest = largest_forward
+            suffix_of_largest = forward_matches[largest_forward]
+            end_index = start_index + len(largest_forward)
+
         return largest, suffix_of_largest, end_index
 
     def forward_extension(self, query, start_index, largest="", suffix_tuple=None):
@@ -299,7 +340,7 @@ class SMEM:
         if suffix_tuple is not None:
             forward_matches[largest] = suffix_tuple
 
-        currentSearch = ""
+        currentSearch = largest
         for i in range(start_index+1, len(query)+1):
             currentSearch = largest + query[start_index:i]
 
@@ -370,9 +411,11 @@ if __name__ == '__main__':
     # q = "CCTAACCCTAACCGCGCAGGCGCAGAGACACATGCTGGCTGTGATACGTGGCCGGCCC" \
     #     "TCGCTCCAGCAGCTGGACCCCAGAACACAGTGGCGCAGGCTGGGTGGAGCCGTCCCCCCTTGTGCCACTTCTGGATGCTAGGGTTACACTG"
 
-    q = create_random_query(20)
+    q = create_random_query(200)
     # q = "TTGACGTGGCTATTGTTTCGTCGCAGATCTTGCGCGAGGGAACACGTGCCGTGCCAAAACCAATGGCCCATGTTTAAGCAAGGAACCCTCCGCAGTCCCGCGCTCACTAAGTGTGTATGGTGAAGTGACATGCAAGGATCGGGTGAATTAGTGTTCATTCTCAAGTGTTCCCAGTGGATACTCTTCGTTCCTTCACTGAGCAACGAAGCTACACCCGGAGTTGCGCTTAGGTTACGAAACTGCATGTATGTATCTGCTCACAGCAAAGGTGCCATTTGCCGCATATCACTCTTGCTATGC"
 
+    # q = "TCGGCTGTCGCGGCGCTTGAAGCAAGAGCCGGGTGTAGCTCGTCTAATTGAAGGTAGAGTTCATTGATTAGTCGTGGATTAGCTTATAACGAGTGTGCGA"
+    # q = "GTTGTATGTGTACCATCGTT"
     print(q)
 
     smem = SMEM(match)

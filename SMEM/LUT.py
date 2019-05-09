@@ -52,5 +52,5 @@ class LUT:
 if __name__ == '__main__':
     matcher = ExactMatch("medium_data.fa")
     lut = LUT(matcher)
-    lut.generate_lut(5)
+    lut.generate_lut(6)
     lut.save_lut()
