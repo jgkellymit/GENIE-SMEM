@@ -76,5 +76,17 @@ def test_case4():
     smem = SMEM(match)
     print(smem.get_smems_lut(q))
 
+
+class foo(object):
+    def __init__(self):
+        pass
+
+    def __len__(self):
+        return -1
+
 if __name__ == '__main__':
-    test_case4()
+    # test_case4()
+    a = ["qqq", "asda", "asdaeaf"]
+    print(max(a))
+
+

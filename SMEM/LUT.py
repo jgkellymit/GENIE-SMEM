@@ -23,15 +23,29 @@ class LUT:
                 if self.matcher.ref_size - size > pos-i >= 0:
                     substring = ref[pos-i:pos+size-i]
 
-                    if substring not in self.lut:
+                    encoded_substring = self.convert_seq_to_num(substring)
+
+                    if encoded_substring not in self.lut:
 
                         # TODO -- Maybe can generate this during fm_index to directly get suffix location
                         # self.lut[substring] = self.matcher.exact_match_back_prop(substring)
 
                         suf_indexes = self.matcher.exact_match_back_prop(substring)
                         ref_indexes = self.matcher.get_positions(suf_indexes[0], suf_indexes[1])
-                        self.lut[substring] = [suf_indexes, ref_indexes]
+                        self.lut[str(encoded_substring)] = [suf_indexes, ref_indexes]
 
+    @staticmethod
+    def convert_seq_to_num(sequence):
+        nucleo = {}
+        nucleo['A'] = 0
+        nucleo['C'] = 1
+        nucleo['G'] = 2
+        nucleo['T'] = 3
+
+        conversion = 0
+        for j in range(len(sequence)):
+            conversion = conversion << 2 | nucleo[sequence[j]]
+        return conversion
 
     def save_lut(self):
         if self.lut is None:
@@ -52,5 +66,5 @@ class LUT:
 if __name__ == '__main__':
     matcher = ExactMatch("medium_data.fa")
     lut = LUT(matcher)
-    lut.generate_lut(6)
+    lut.generate_lut(7)
     lut.save_lut()

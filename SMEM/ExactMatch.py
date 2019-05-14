@@ -113,7 +113,6 @@ class ExactMatch:
         if self.ref_sequence is None:
             self.load_ref_sequence()
 
-        random.seed(0)
         query_start = random.randint(0, self.ref_size - query_size - 1) # -1 for dollar sign
         query = self.ref_sequence[query_start: query_start + query_size]
         if query_output_file is not None:
@@ -185,5 +184,11 @@ if __name__ == '__main__':
     e_match = ExactMatch("medium_data.fa")
     # e_match.create_fm_index()
     e_match.load_fm_index()
-    e_match.create_query(200, "query200.fa")
+    q = e_match.create_query(100, "query100.fa")
     # print(e_match.exact_match())
+
+    import datetime
+
+    s = datetime.datetime.now()
+    print(e_match.exact_match_back_prop(q))
+    print(datetime.datetime.now() - s)
