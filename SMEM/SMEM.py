@@ -49,10 +49,12 @@ class SMEM:
             current_smem_possibility = None
             current_smem_suffix = ()
             current_smem_end_index = -1
+            prev_smem_start = end_smem_index - prev_smem_length
 
             for i in range(self.lut.lut_size):
                 if i >= prev_smem_length:  # Within prev smem, dont need to check
                     continue
+
 
                 current_index = end_smem_index - i
                 if current_index + self.lut.lut_size > len(query):
@@ -86,6 +88,10 @@ class SMEM:
                                         current_smem_suffix = forward_match[0][forward_match[1]]
                                         current_smem_end_index = len(forward_match[1]) + prev_frame[2]
                             elif prev_frame[3]:  # backward extend
+                                # This is a theoretical improvement but doesnt seem to happen in practice
+                                if current_smem_possibility is not None and (prev_frame[2] - prev_smem_start) + self.lut.lut_size < len(current_smem_possibility):
+                                    continue  # this SMEM cannot be longer than previously found SMEM
+
                                 backward_smems = self.backward_extension(query, prev_frame[2], {prev_frame[0]: prev_frame[1]})
                                 if current_smem_possibility is None or len(backward_smems[0]) >= len(current_smem_possibility):
                                     current_smem_possibility = backward_smems[0]
@@ -229,6 +235,7 @@ class SMEM:
             current_smem_possibility = None
             current_smem_suffix = ()
             current_smem_end_index = -1
+            prev_smem_start = end_smem_index - prev_smem_length
 
             for i in range(self.rmi_lut.prediction_size):
                 if i >= prev_smem_length:  # Within prev smem, dont need to check
@@ -271,6 +278,13 @@ class SMEM:
                                         current_smem_suffix = forward_match[0][forward_match[1]]
                                         current_smem_end_index = len(forward_match[1]) + prev_frame[2]
                             elif prev_frame[3]:  # backward extend
+
+                                # This is a theoretical improvement but doesnt seem to happen in practice
+                                if current_smem_possibility is not None and (
+                                        prev_frame[2] - prev_smem_start) + self.rmi_lut.prediction_size < len(
+                                        current_smem_possibility):
+                                    continue  # this SMEM cannot be longer than previously found SMEM
+
                                 backward_smems = self.backward_extension(query, prev_frame[2], {prev_frame[0]: prev_frame[1]})
                                 if current_smem_possibility is None or len(backward_smems[0]) >= len(current_smem_possibility):
                                     current_smem_possibility = backward_smems[0]
