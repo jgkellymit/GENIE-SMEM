@@ -151,6 +151,26 @@ class ExactMatch:
         return start - 1, end - 1  # return zero indexed start and end
 
 
+    # Do one iteration of back search on first element of query given last n-1 elements suffix tuple
+    def exact_match_back_prop_add_one(self, char, prev_suffix_tuple):
+        start = prev_suffix_tuple[0] + 1
+        end = prev_suffix_tuple[1] + 1
+
+        char_count = self.fm_index["count_dic"][char]
+        if start - 1 <= 0:
+            start = char_count + 1
+        else:
+            start = char_count + 1 + self.fm_index["occurance_matrix"][char][start - 2]  # minus 2 bc zero index
+
+        end = char_count + self.fm_index["occurance_matrix"][char][end - 1]  # minus 1 bc zero index
+
+        # No match in ref seq
+        if start > end:
+            return -1
+
+        return start - 1, end - 1  # return zero indexed start and end
+
+
     def exact_match(self, query_seq: str=None):
         if query_seq is None:
             if self.query_sequence is None:
