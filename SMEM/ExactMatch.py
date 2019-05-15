@@ -180,15 +180,27 @@ class ExactMatch:
 
 
 if __name__ == '__main__':
-
-    e_match = ExactMatch("medium_data.fa")
-    # e_match.create_fm_index()
-    e_match.load_fm_index()
-    q = e_match.create_query(100, "query100.fa")
+    import datetime
+    pre = datetime.datetime.now()
+    e_match = ExactMatch("large_data.fa")
+    first = datetime.datetime.now()
+    print("Initialize: " + str(first - pre))
+    e_match.create_fm_index()
+    # e_match.load_fm_index()
+    # q = e_match.create_query(10, "query10.fa")
     # print(e_match.exact_match())
 
-    import datetime
-
     s = datetime.datetime.now()
-    print(e_match.exact_match_back_prop(q))
-    print(datetime.datetime.now() - s)
+    print("Create fm: " + str(s - first))
+
+    q = e_match.create_query(5000)
+
+    b = datetime.datetime.now()
+    print("Create query: " + str(b - s))
+
+    e_match.exact_match_back_prop(q)
+    # print(e_match.get_positions(a[0], a[1]))
+    end = datetime.datetime.now()
+    print("Back prop: " + str(end - s))
+
+
