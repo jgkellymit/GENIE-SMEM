@@ -66,5 +66,5 @@ class LUT:
 if __name__ == '__main__':
     matcher = ExactMatch("big_data.fa")
     lut = LUT(matcher)
-    lut.generate_lut(7)
+    lut.generate_lut(14)
     lut.save_lut()

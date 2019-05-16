@@ -1,6 +1,6 @@
 from ExactMatch import ExactMatch
 from LUT import LUT
-from learned_index.RMI_LUT import RMI_LUT
+from RMI_LUT import RMI_LUT
 import datetime
 import random
 import os
@@ -206,7 +206,7 @@ class SMEM:
 
 
     def get_smems_rmi(self, query):
-        self.rmi_lut = RMI_LUT.load("learned_index/rmi_file.pkl")
+        self.rmi_lut = RMI_LUT.load("rmi_file.pkl")
 
         all_smems = {}
         current_index = 0
@@ -514,7 +514,7 @@ if __name__ == '__main__':
     smem = SMEM(match)
 
 
-    query_sizes_to_test = [10, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000]
+    query_sizes_to_test = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000]
     num_runs = 5
 
     lut_times = []
@@ -522,7 +522,7 @@ if __name__ == '__main__':
     og_times = []
 
     for query_size in query_sizes_to_test:
-        q = create_query_from_ref(match.ref_sequence, 200)
+        q = create_query_from_ref(match.ref_sequence, query_size)
 
         avg_lut_time = 0
         avg_rmi_time = 0
@@ -561,7 +561,7 @@ if __name__ == '__main__':
     df["RMI Times"] = rmi_times
 
 
-    df.to_csv("results/multiple_q_sizes_lutsize_7_rmisize_7.csv")
+    df.to_csv("results/multiple_q_sizes_lutsize_14_rmisize_14.csv")
 
 
     # print(a)

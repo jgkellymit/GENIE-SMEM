@@ -211,16 +211,19 @@ if __name__ == '__main__':
     # print(e_match.exact_match())
 
     s = datetime.datetime.now()
-    print("Load fm: " + str(s - first))
-
-    q = e_match.create_query(2000)
-
-    b = datetime.datetime.now()
-    print("Create query: " + str(b - s))
-
-    e_match.exact_match_back_prop(q)
-    # print(e_match.get_positions(a[0], a[1]))
-    end = datetime.datetime.now()
-    print("Back prop: " + str(end - s))
+    # print("Load fm: " + str(s - first))
 
 
+    # print("Create query: " + str(b - s))
+
+    back_prop_time = 0
+    for i in range(1):
+        q = e_match.create_query(100, "query100.fa")
+        b = datetime.datetime.now()
+        e_match.exact_match_back_prop(q)
+        end = datetime.datetime.now()
+
+        delta = end - b
+        back_prop_time+=delta.total_seconds()
+
+    print("Back Prop Average Runtime:", back_prop_time/1)
