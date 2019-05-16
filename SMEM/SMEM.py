@@ -4,6 +4,8 @@ from learned_index.RMI_LUT import RMI_LUT
 import datetime
 import random
 import os
+import pandas as pd
+import csv
 
 class SMEM:
     def __init__(self, matcher: ExactMatch):
@@ -506,44 +508,68 @@ def create_query_from_ref(ref_seq, query_size):
 
 
 if __name__ == '__main__':
-    match = ExactMatch("medium_data.fa")
+    match = ExactMatch("big_data.fa")
     match.load_fm_index()
     match.load_ref_sequence()
-
-    # q = create_random_query(200)
-    q = create_query_from_ref(match.ref_sequence, 200)
-    print(q)
-    # q = "CGCAATACCTTAATCGTTTAGTCTTTCATTCCAACTGGAAAGAATTCCCGCACTTCTAGACGCGAGTTCTGCAAAGCCTCAGTTTTACTTCGTATTGCCCGTAGGCAAACGTCCTCTCATTTACCTTCAGTGGCAATGTCTGTGTCAACTGCTACACTTACCTCGATGTAAGAGATGACTACGGCTCTGGAAGATACCCT"
-
     smem = SMEM(match)
 
 
-    start = datetime.datetime.now()
-    a = smem.get_smems_lut(q)
-    mid = datetime.datetime.now()
+    query_sizes_to_test = [10, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000]
+    num_runs = 5
 
-    b = smem.get_SMEMS(q, 1)
+    lut_times = []
+    rmi_times = []
+    og_times = []
 
-    sec = datetime.datetime.now()
+    for query_size in query_sizes_to_test:
+        q = create_query_from_ref(match.ref_sequence, 200)
 
-    c = smem.get_smems_rmi(q)
+        avg_lut_time = 0
+        avg_rmi_time = 0
+        avg_og_time = 0
+        for i in range(num_runs):
+            start = datetime.datetime.now()
+            a = smem.get_smems_lut(q)
+            mid = datetime.datetime.now()
+            b = smem.get_SMEMS(q, 1)
+            sec = datetime.datetime.now()
+            c = smem.get_smems_rmi(q)
+            end = datetime.datetime.now()
 
-    end = datetime.datetime.now()
-    print("Lut time:")
-    print(mid - start)
+            lut_delta = mid - start
+            rmi_delta = end - sec
+            og_delta = sec - mid
 
-    print("RMI time")
-    print(end - sec)
+            avg_lut_time += lut_delta.total_seconds()
+            avg_rmi_time += rmi_delta.total_seconds()
+            avg_og_time += og_delta.total_seconds()
 
-    print("OG time")
-    print(sec - mid)
+
+        lut_time = avg_lut_time/num_runs
+        rmi_time = avg_rmi_time/num_runs
+        og_time = avg_og_time/num_runs
+
+        lut_times.append(lut_time)
+        rmi_times.append(rmi_time)
+        og_times.append(og_time)
+
+
+    df = pd.DataFrame()
+    df["Query Size"] = query_sizes_to_test
+    df["OG Times"] = og_times
+    df["LUT Times"] = lut_times
+    df["RMI Times"] = rmi_times
+
+
+    df.to_csv("results/multiple_q_sizes_lutsize_7_rmisize_7.csv")
+
 
     # print(a)
     # print(b)
     # print(c)
     #
-    print(len(a))
-    print(len(b))
-    print(len(c))
+    # print(len(a))
+    # print(len(b))
+    # print(len(c))
     # if len(a) != len(b):
     #     print("SMEMS DONT MATCH")
