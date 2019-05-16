@@ -202,18 +202,18 @@ class ExactMatch:
 if __name__ == '__main__':
     import datetime
     pre = datetime.datetime.now()
-    e_match = ExactMatch("large_data.fa")
+    e_match = ExactMatch("big_data.fa")
     first = datetime.datetime.now()
     print("Initialize: " + str(first - pre))
-    e_match.create_fm_index()
-    # e_match.load_fm_index()
+    # e_match.create_fm_index()
+    e_match.load_fm_index()
     # q = e_match.create_query(10, "query10.fa")
     # print(e_match.exact_match())
 
     s = datetime.datetime.now()
-    print("Create fm: " + str(s - first))
+    print("Load fm: " + str(s - first))
 
-    q = e_match.create_query(5000)
+    q = e_match.create_query(2000)
 
     b = datetime.datetime.now()
     print("Create query: " + str(b - s))

@@ -188,12 +188,12 @@ class RMI_LUT:
         return new_rmi
 
 if __name__ == '__main__':
-    rmi_lut = RMI_LUT([10, 100], 6, "medium_data.fa")
+    rmi_lut = RMI_LUT([10, 100], 9, "big_data.fa")
     rmi_lut.train_RMI()
 
     rmi_lut.save("rmi_file.pkl")
 
-    new_rmi = RMI_LUT.load("rmi_file.pkl")
+    # new_rmi = RMI_LUT.load("rmi_file.pkl")
 
     # print(new_rmi.get_suffix_rmi("AAAACCACTA"))
 
