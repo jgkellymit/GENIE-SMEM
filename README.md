@@ -9,11 +9,11 @@ Exact Match
 
 
 Super Maximal Exact Match (SMEM)
-  A) cd into GENIE/SMEM 
-  B) run python SMEM.py to run all three tyoes of SMEM search: BWA, LUT, and RMI
+  a) cd into GENIE/SMEM 
+  b) run python SMEM.py to run all three tyoes of SMEM search: BWA, LUT, and RMI
     
    1) LUT
-      - run python LUT.py to create a new LUT with the given parameters. The LUT size can be modified at the end of the file. 
+      - Run python LUT.py to create a new LUT with the given parameters. The LUT size can be modified at the end of the file. 
     
    2) RMI
-      - run python RMI_LUT.py to create a new RMI with the given parameters. The RMI size and expert levels can be modified at         the end of the file.
+      - Run python RMI_LUT.py to create a new RMI with the given parameters. The RMI size and expert levels can be modified at         the end of the file.
