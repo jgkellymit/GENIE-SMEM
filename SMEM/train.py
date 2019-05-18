@@ -3,12 +3,14 @@ from Bio import SeqIO
 import numpy as np
 import time
 import json
+from ExactMatch import  ExactMatch
+
 
 start_time = time.time()
 
-fm_file = "../data/medium_data-FM.json"
-ref_seq_file = "../data/medium_data.fa"
-query_db = "../data/query10.fa"
+fm_file = "data/big_data-FM.json"
+ref_seq_file = "data/big_data.fa"
+query_db = "data/query500.fa"
 query_size = 10
 output_file = "output.txt"
 

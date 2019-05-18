@@ -187,11 +187,26 @@ class RMI_LUT:
         new_rmi.rmi = model_params[3]
         return new_rmi
 
-if __name__ == '__main__':
-    rmi_lut = RMI_LUT([10, 100], 9, "big_data.fa")
-    rmi_lut.train_RMI()
+    def read_query_and_encode(self, query_db="data/query500.fa"):
 
-    rmi_lut.save("rmi_file.pkl")
+        queries = []
+        for record in SeqIO.parse(query_db, "fasta"):
+            queries.append(record.seq)
+
+        for query in queries:
+            query_int = 0
+            for j in range(len(query)):
+                query_int = query_int << 2 | self.nucleo[query[j]]
+        return query_int
+
+if __name__ == '__main__':
+    rmi_lut = RMI_LUT([10, 100], 500, "big_data.fa")
+    rmi_lut.train_RMI()
+    encoded_q = rmi_lut.read_query_and_encode()
+
+    print(rmi_lut.get_suffix_rmi(encoded_q, True))
+
+    # rmi_lut.save("rmi_file.pkl")
 
     # new_rmi = RMI_LUT.load("rmi_file.pkl")
 
