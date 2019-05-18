@@ -9,13 +9,13 @@ Exact Match
 
 
 Super Maximal Exact Match (SMEM)
-  A) cd into GENIE/SMEM
-    1) BWA
+  A) cd into GENIE/SMEM 
+   1) BWA
       - Run python SMEM.py (currently also runs the LUT and RMI for runtime comparison)
     
-    2) LUT
+   2) LUT
       - sdfdfs
     
     
-    3) RMI
+   3) RMI
       - sfsdf
