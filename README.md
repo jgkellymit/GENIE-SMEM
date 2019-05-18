@@ -1,6 +1,8 @@
 # GENIE-SMEM
 MIT 6.890 Final Project - Using ML to predict suffix array location to discover SMEMs
 
+Our implementations use the BWA-SMEM, LUT and RMI approaches to finding SMEM's within large query sequences. You may change the reference sequence and query sequence for each approach.
+
 Requirements: Python 3, biopython (pip install biopython)
 
 Exact Match
