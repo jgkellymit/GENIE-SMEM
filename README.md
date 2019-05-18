@@ -5,17 +5,15 @@ MIT 6.890 Final Project - Using ML to predict suffix array location to discover 
 
 Exact Match
 1) cd into GENIE/SMEM
-2) Run python ExactMatch.py
+2) run python ExactMatch.py
 
 
 Super Maximal Exact Match (SMEM)
   A) cd into GENIE/SMEM 
-   1) BWA
-      - Run python SMEM.py (currently also runs the LUT and RMI for runtime comparison)
+  B) run python SMEM.py to run all three tyoes of SMEM search: BWA, LUT, and RMI
     
-   2) LUT
-      - sdfdfs
+   1) LUT
+      - run python LUT.py to create a new LUT with the given parameters. The LUT size can be modified at the end of the file. 
     
-    
-   3) RMI
-      - sfsdf
+   2) RMI
+      - run python RMI_LUT.py to create a new RMI with the given parameters. The RMI size and expert levels can be modified at         the end of the file.
