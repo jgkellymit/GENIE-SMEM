@@ -1,7 +1,7 @@
 # GENIE-SMEM
 MIT 6.890 Final Project - Using ML to predict suffix array location to discover SMEMs
 
-Requirements: Python 3
+Requirements: Python 3, biopython (pip install biopython)
 
 Exact Match
 1) cd into GENIE/SMEM
