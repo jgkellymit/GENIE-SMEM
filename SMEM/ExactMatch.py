@@ -170,7 +170,7 @@ class ExactMatch:
 
         return start - 1, end - 1  # return zero indexed start and end
 
-
+    # Do backwards search algorithm and return sorted real positions of all matches in ref sequence.
     def exact_match(self, query_seq: str=None):
         if query_seq is None:
             if self.query_sequence is None:
@@ -207,20 +207,20 @@ if __name__ == '__main__':
     print("Initialize: " + str(first - pre))
     # e_match.create_fm_index()
     e_match.load_fm_index()
-    # q = e_match.create_query(10, "query10.fa")
+    q = e_match.create_query(500, "query500.fa")
     # print(e_match.exact_match())
 
-    s = datetime.datetime.now()
-    print("Load fm: " + str(s - first))
-
-    q = e_match.create_query(2000)
-
-    b = datetime.datetime.now()
-    print("Create query: " + str(b - s))
-
-    e_match.exact_match_back_prop(q)
-    # print(e_match.get_positions(a[0], a[1]))
-    end = datetime.datetime.now()
-    print("Back prop: " + str(end - s))
+    # s = datetime.datetime.now()
+    # print("Load fm: " + str(s - first))
+    #
+    # # q = e_match.create_query(2000)
+    #
+    # b = datetime.datetime.now()
+    # print("Create query: " + str(b - s))
+    #
+    # e_match.exact_match_back_prop(q)
+    # # print(e_match.get_positions(a[0], a[1]))
+    # end = datetime.datetime.now()
+    # print("Back prop: " + str(end - b))
 
 

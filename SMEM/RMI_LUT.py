@@ -1,9 +1,11 @@
-from learned_index.RMI import *
+from RMI import *
 from Bio import SeqIO
 import numpy as np
 import json
 import pickle
 import os
+from ExactMatch import ExactMatch
+
 
 class RMI_LUT:
 
@@ -61,10 +63,18 @@ class RMI_LUT:
         return self.rmi.predict(np.asarray(encoded_query).reshape(-1, 1))
 
 
+
     def get_suffix_rmi(self, query, encoded=False):
+        # start = datetime.datetime.now()
 
         start_sa = self.rmi_predict(query, encoded)
+        # mid = datetime.datetime.now()
         result = self.exponential_search(query, int(start_sa))
+        # end = datetime.datetime.now()
+
+        # predict_time = (mid - start).total_seconds()
+        # search_time = (end - mid).total_seconds()
+
         return result
 
 
@@ -200,13 +210,50 @@ class RMI_LUT:
         return query_int
 
 if __name__ == '__main__':
-    rmi_lut = RMI_LUT([10, 100], 500, "big_data.fa")
+
+    import sys
+    import datetime
+    # expert = [int(sys.argv[1]), int(sys.argv[2])]
+    expert = [10, 100]
+
+    q_size = 15
+
+    rmi_lut = RMI_LUT(expert, q_size, "big_data.fa")
     rmi_lut.train_RMI()
-    encoded_q = rmi_lut.read_query_and_encode()
+    #
+    # e_match = ExactMatch("big_data.fa")
+    # e_match.load_fm_index()
+    #
+    # print("Starting query time analysis")
+    # search_total = 0
+    # predict_total = 0
+    # og_total = 0
+    # for x in range(100):
+    #     q = e_match.create_query(q_size)
+    #
+    #     suffix1, predict, search = rmi_lut.get_suffix_rmi(q, False)
+    #     start = datetime.datetime.now()
+    #     suffix2 = e_match.exact_match_back_prop(q)
+    #     end = datetime.datetime.now()
+    #
+    #     og_timed = end - start
+    #
+    #     predict_total += predict
+    #     search_total += search
+    #     og_total += og_timed.total_seconds()
+    #
+    #     if suffix1 != suffix2:
+    #         print(suffix1)
+    #         print(suffix2)
+    #         raise Exception
+    #
+    # print(predict_total)
+    # print(search_total)
+    # print(predict_total + search_total)
+    #
+    # print(og_total)
 
-    print(rmi_lut.get_suffix_rmi(encoded_q, True))
-
-    # rmi_lut.save("rmi_file.pkl")
+    rmi_lut.save("rmi_file.pkl")
 
     # new_rmi = RMI_LUT.load("rmi_file.pkl")
 

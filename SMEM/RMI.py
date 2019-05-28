@@ -84,3 +84,15 @@ class RMI:
         with open(filename, 'wb+') as f:
             f.write(sizes.tobytes())
             f.write(weights.tobytes())
+
+# import datetime
+#
+# # print(np.base_repr(10, 4))
+# q = "3" * 500
+# subseq = 0
+# s = datetime.datetime.now()
+# for j in range(len(q)):
+#     subseq = subseq << 2 | int(q[j])
+# print(datetime.datetime.now() - s)
+#
+# # print(len(str(subseq)))

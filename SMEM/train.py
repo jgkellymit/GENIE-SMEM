@@ -10,8 +10,8 @@ start_time = time.time()
 
 fm_file = "data/big_data-FM.json"
 ref_seq_file = "data/big_data.fa"
-query_db = "data/query500.fa"
-query_size = 10
+query_db = "data/query200.fa"
+query_size = 200
 output_file = "output.txt"
 
 rmi = RMI([10, 100])
@@ -70,9 +70,37 @@ for query in queries:
         query_int = query_int << 2 | nucleo[query[j]]
     x_predict.append(query_int)
 
+for x in range(1000):
+    x_predict.append(x_predict[0] * 100 * x)
 
-y_predict = rmi.predict(np.asarray(x_predict).reshape(-1, 1))
+import datetime
 
+start = datetime.datetime.now()
+y_predict = rmi.predict(np.asarray(x_predict[0]).reshape(-1, 1))
+end = datetime.datetime.now()
+print(end - start)
+
+
+start = datetime.datetime.now()
+y_predict = rmi.predict(np.asarray(x_predict[:10]).reshape(-1, 1))
+end = datetime.datetime.now()
+print(end - start)
+
+
+start = datetime.datetime.now()
+y_predict = rmi.predict(np.asarray(x_predict[:100]).reshape(-1, 1))
+end = datetime.datetime.now()
+print(end - start)
+
+start = datetime.datetime.now()
+y_predict = rmi.predict(np.asarray(x_predict[:500]).reshape(-1, 1))
+end = datetime.datetime.now()
+print(end - start)
+
+start = datetime.datetime.now()
+y_predict = rmi.predict(np.asarray(x_predict[:1000]).reshape(-1, 1))
+end = datetime.datetime.now()
+print(end - start)
 
 predict_time = time.time()
 
@@ -84,6 +112,7 @@ def get_ref_int(ind):
     return ref_int
 
 def get_ref_seq(ind):
+    print(ind)
     if suffix_array[ind] + query_size > len(ref_seq):
         return None
     return ref_seq[suffix_array[ind] - 1:(suffix_array[ind] + query_size) - 1]

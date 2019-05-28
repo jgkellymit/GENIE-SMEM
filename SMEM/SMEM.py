@@ -1,6 +1,6 @@
 from ExactMatch import ExactMatch
 from LUT import LUT
-from learned_index.RMI_LUT import RMI_LUT
+from RMI_LUT import RMI_LUT
 import datetime
 import random
 import os
@@ -204,7 +204,7 @@ class SMEM:
 
 
     def get_smems_rmi(self, query):
-        self.rmi_lut = RMI_LUT.load("learned_index/rmi_file.pkl")
+        self.rmi_lut = RMI_LUT.load("rmi_file.pkl")
 
         all_smems = {}
         current_index = 0
@@ -505,45 +505,81 @@ def create_query_from_ref(ref_seq, query_size):
     return query[:query_size]
 
 
-if __name__ == '__main__':
-    match = ExactMatch("medium_data.fa")
+def score_LUT(num_iter):
+    lut_total = 0
+    og_total = 0
+    rmi_total = 0
+    match = ExactMatch("big_data.fa")
     match.load_fm_index()
     match.load_ref_sequence()
+    smem = SMEM(match)
+    for x in range(num_iter):
+        q = create_query_from_ref(match.ref_sequence, 2000)
+        start = datetime.datetime.now()
+        a = smem.get_smems_lut(q)
+        mid = datetime.datetime.now()
+        b = smem.get_SMEMS(q, 1)
+        end = datetime.datetime.now()
+        c = smem.get_smems_rmi(q)
+        after = datetime.datetime.now()
 
-    # q = create_random_query(200)
-    q = create_query_from_ref(match.ref_sequence, 200)
-    print(q)
+        lut_timed = mid - start
+        og_timed = end - mid
+        rmi_timed = after - end
+
+        lut_total += lut_timed.total_seconds()
+        og_total += og_timed.total_seconds()
+        rmi_total += rmi_timed.total_seconds()
+
+
+        if len(a) != len(b) or len(b) != len(c):
+            raise Exception
+
+
+    return lut_total / num_iter, og_total / num_iter, rmi_total /num_iter
+
+
+if __name__ == '__main__':
+
+
+    # match.load_ref_sequence()
+
+    # q = create_query_from_ref(match.ref_sequence, 200)
+    # print(q)
     # q = "CGCAATACCTTAATCGTTTAGTCTTTCATTCCAACTGGAAAGAATTCCCGCACTTCTAGACGCGAGTTCTGCAAAGCCTCAGTTTTACTTCGTATTGCCCGTAGGCAAACGTCCTCTCATTTACCTTCAGTGGCAATGTCTGTGTCAACTGCTACACTTACCTCGATGTAAGAGATGACTACGGCTCTGGAAGATACCCT"
 
-    smem = SMEM(match)
 
 
-    start = datetime.datetime.now()
-    a = smem.get_smems_lut(q)
-    mid = datetime.datetime.now()
 
-    b = smem.get_SMEMS(q, 1)
+    # b = smem.get_SMEMS(q, 1)
+    #
+    # sec = datetime.datetime.now()
 
-    sec = datetime.datetime.now()
+    # c = smem.get_smems_rmi(q)
 
-    c = smem.get_smems_rmi(q)
-
-    end = datetime.datetime.now()
+    # end = datetime.datetime.now()
+    iter = 10
+    one, two, three = score_LUT(iter)
     print("Lut time:")
-    print(mid - start)
+    print(one)
+    #
+    print("OG time")
+    print(two)
 
     print("RMI time")
-    print(end - sec)
+    print(three)
 
-    print("OG time")
-    print(sec - mid)
-
-    # print(a)
-    # print(b)
-    # print(c)
     #
-    print(len(a))
-    print(len(b))
-    print(len(c))
+    # # print("RMI time")
+    # # print(end - sec)
+    # #
+    #
+    # # print(a)
+    # # print(b)
+    # # print(c)
+    # #
+    # print(len(a))
+    # print(len(b))
+    # print(len(c))
     # if len(a) != len(b):
     #     print("SMEMS DONT MATCH")
